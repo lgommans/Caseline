@@ -31,11 +31,13 @@ while ($row = fgets($f)) {
 			if ($row[$i] == ',') {
 				$cols[] = $currentCol;
 				$currentCol = '';
+				$firstByteOfCol = true;
 			}
 			else {
 				$currentCol .= $row[$i];
 			}
 		}
+		$firstByteOfCol = false;
 	}
 	$cols[] = $currentCol;
 	if (!is_numeric($cols[0])) {
