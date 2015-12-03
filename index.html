@@ -257,6 +257,22 @@
 				updateEvents();
 			};
 
+			document.addEventListener('wheel', function(ev) {
+				var ratio = ev.clientX / window.innerWidth;
+				var from = datestr2unix($("from").value);
+				var until = datestr2unix($("until").value);
+				var timespan = until - from;
+				var fromdiff = timespan * 0.3 * ratio;
+				var untildiff = timespan * 0.3 * (1 - ratio);
+				if (ev.deltaY > 0) {
+					fromdiff = -fromdiff;
+					untildiff = -untildiff;
+				}
+				$("from").value = unix2datestr(from + fromdiff);
+				$("until").value = unix2datestr(until - untildiff);
+				updateEvents();
+			});
+
 			filterEvents();
 			updateEvents();
 		</script>
