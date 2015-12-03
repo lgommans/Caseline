@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset='utf-8'/>
+		<title>Caseline - A timeline viewer</title>
+		<style>
+			#wrapper {
+				margin: 3px;
+				position: relative;
+				width: 90%;
+			}
+			#controls {
+				position: relative;
+			}
+			#untilDiv {
+				float: right;
+			}
+			#timeControlsDiv {
+				position: absolute;
+				left: 300px;
+				margin: 0 0 0 13px;
+				overflow: visible;
+			}
+			#fromDiv {
+				float: left;
+			}
+			#timeline {
+				border-top: 1px solid grey;
+				position: relative;
+				top: 32px;
+			}
+			#filterhelp {
+				color: white;
+				background-color: blue;
+				padding: 2px 1px 0px 1px;
+				cursor: pointer;
+			}
+		</style>
+	</head>
+	<body>
+		<div id=wrapper>
+			<div id=controls>
+				<div id="fromDiv">
+					<input type=button id=scrollBack value=->
+					From: <input id=from value="25 Jun 00:00">
+				</div>
+				<div id="timeControlsDiv">
+					<input type=button id=showalltime value="Show all time">
+					&nbsp; &nbsp; &nbsp;
+					Filter: <input id=filter size=30>
+					<input type=checkbox id=advfilter><a id=filterhelp>adv</a>
+					<input type=checkbox id=regexfilter checked=checked>regex
+				</div>
+				<div id="untilDiv">
+					Until: <input id=until value="30 Aug 00:00">
+					<input type=button id=scrollForward value=+>
+				</div>
+			</div>
+			<div id=timeline></div>
+		</div>
+		<script src="lib.js"></script>
+		<script>
+			var maxtime = 1000 * 5; // 5 seconds
+			// Estimated rendering time per event is 89ns (someone should double-check
+			// this because I almost don't believe how fast this is).
+
+			var events = JSON.parse(GET('api.php?getEvents'));
+			var filteredEvents = [];
+			if (events.length == 0) {
+				alert("Error: no events found.");
+			}
+			$("from").value = unix2datestr(events[0].datetime - 1);
+			$("until").value = unix2datestr(events[events.length - 1].datetime + 1);
+
+			function filterEvents() {
+				var starttime = new Date().getTime();
+				filteredEvents = [];
+				var filter = $("filter").value;
+				if (filter.length == 0) {
+					filteredEvents = events;
+					return;
+				}
+				for (var eventi in events) {
+					var event = events[eventi];
+					if ($("advfilter").checked) {
+						var filters = filter.split("|");
+						for (var filters2 in filters) {
+							filters3 = filters[filters2];
+							var ok = true;
+							var filters3 = filters3.split("&");
+							for (var filters4 in filters3) {
+								filters4 = filters3[filters4].split(":");
+								var field = filters4[0];
+								var filter = filters4[1];
+								switch (field) {
+									case 'msg':
+										field = event.content;
+										break;
+									case 'dev':
+										field = event.device;
+										break;
+									case 'src':
+										field = event.source;
+										break;
+									default:
+										return [];
+								}
+								if (!new RegExp(filter).test(field)) {
+									console.log(filter + " did not match " + field);
+									ok = false;
+									break;
+								}
+							}
+							if (!ok) {
+								continue;
+							}
+							else {
+								filteredEvents.push(event);
+								break;
+							}
+						}
+					}
+					else {
+						// No advanced filters
+						if ($("regexfilter").checked) {
+							re = new RegExp(filter);
+							if (re.test(event.content)
+								|| re.test(event.source)
+								|| re.test(event.device)) {
+								filteredEvents.push(event);
+							}
+						}
+						else {
+							if (event.content.indexOf(filter) != -1
+								|| event.source.indexOf(filter) != -1
+								|| event.device.indexOf(filter) != -1) {
+								filteredEvents.push(event);
+							}
+						}
+					}
+					if (starttime + maxtime < new Date().getTime()) {
+						console.log("Error 1895: I won't be working overtime.");
+						return;
+					}
+				}
+				//console.log("Filtering time: " + (new Date().getTime() - starttime) + "ms");
+			}
+
+			function updateEvents() {
+				var starttime = new Date().getTime();
+				var from = datestr2unix($("from").value);
+				var until = datestr2unix($("until").value);
+				if (from == false || until == false) {
+					console.log("Invalid date.");
+					return;
+				}
+
+				$("timeline").innerHTML = '';
+
+				var previousEventPosPerc = 0;
+				var previousEventTop = 0;
+				for (var eventi in filteredEvents) {
+					var event = filteredEvents[eventi];
+					if (event.datetime < from || event.datetime > until) {
+						continue;
+					}
+					var posPerc = (event.datetime - from) / (until - from) * 100;
+					var left = Math.round(posPerc) + "%";
+					var top = 0;
+					if (previousEventPosPerc / posPerc > 0.9) {
+						if (previousEventTop > 800) {
+							previousEventTop = 800;
+						}
+						top = previousEventTop + 95 - (previousEventTop * previousEventTop / 15000);
+					}
+
+					var col = (eventi % 2) * 8 + 247;
+					var evtDiv = newDiv($("timeline"));
+					evtDiv.style = obj2style(
+						{ width: "150px"
+						, position: "absolute"
+						, left: left
+						, "background-color": "rgb(" + col + "," + col + "," + col + ")"
+						, border: "1px solid grey"
+						, "border-left": "2px solid black"
+						, "border-bottom": "2px solid black"
+						, "word-wrap": "break-word"
+						, top: top + "px"
+					});
+					evtDiv.onmouseover = function(ev) {
+						ev.target.style.zIndex = 9999;
+					};
+					evtDiv.onmouseout  = function(ev) {
+						ev.target.style.zIndex = 0;
+					};
+					evtDiv.innerHTML = "<i>" + event.printableDatetime + "</i><br>"
+						+ "@" + event.device + ":<br>"
+						+ event.content + "<br>"
+						+ "<i>Source: " + event.source + "</i>";
+
+					if (top == 0) {
+						previousEventPosPerc = posPerc;
+					}
+					previousEventTop = top;
+
+					if (starttime + maxtime < new Date().getTime()) {
+						console.log("Error 6571: I won't be working overtime.");
+						return;
+					}
+				}
+				//console.log("Rendering time: " + (new Date().getTime() - starttime) + "ms");
+			}
+
+			$("scrollBack").onclick = function() {
+				var from = datestr2unix($("from").value);
+				var until = datestr2unix($("until").value);
+				var timechange = (until - from) * 0.1;
+				$("from").value = unix2datestr(from - timechange);
+				$("until").value = unix2datestr(until - timechange);
+				updateEvents();
+			};
+
+			$("scrollForward").onclick = function() {
+				var from = datestr2unix($("from").value);
+				var until = datestr2unix($("until").value);
+				var timechange = (until - from) * 0.1;
+				$("from").value = unix2datestr(from + timechange);
+				$("until").value = unix2datestr(until + timechange);
+				updateEvents();
+			};
+
+			$("filterhelp").onclick = function() {
+				alert("Syntax: field:value|field:value&field:value\n"
+					+ "Where field is dev, msg or src and value is a regex.\n"
+					+ "Example: msg:installed");
+			};
+
+			$("showalltime").onclick = function() {
+				$("from").value = unix2datestr(events[0].datetime - 1);
+				$("until").value = unix2datestr(events[events.length - 1].datetime + 1);
+				updateEvents();
+			};
+
+			var elem = "until";
+			$(elem).onkeyup = $(elem).onchange = $(elem).onmouseup = function() {
+				updateEvents();
+			};
+
+			var elem = "from";
+			$(elem).onkeyup = $(elem).onchange = $(elem).onmouseup = function() {
+				updateEvents();
+			};
+
+			var elem = "filter";
+			$(elem).onkeyup = $(elem).onchange = $(elem).onmouseup = function() {
+				filterEvents();
+				updateEvents();
+			};
+
+			filterEvents();
+			updateEvents();
+		</script>
+	</body>
+</html>
