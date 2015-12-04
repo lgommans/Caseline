@@ -9,8 +9,12 @@
 				position: relative;
 				width: 90%;
 			}
+			#viewcontrols {
+				position: absolute;
+			}
 			#controls {
 				position: relative;
+				top: 32px;
 			}
 			#untilDiv {
 				float: right;
@@ -27,7 +31,7 @@
 			#timeline {
 				border-top: 1px solid grey;
 				position: relative;
-				top: 32px;
+				top: 64px;
 			}
 			#filterhelp {
 				color: white;
@@ -39,6 +43,10 @@
 	</head>
 	<body>
 		<div id=wrapper>
+			<div id=viewcontrols>
+				<input type=button id=saveView value="Save current view"> |
+				Select a saved view: <select id=selectView></select>
+			</div>
 			<div id=controls>
 				<div id="fromDiv">
 					<input type=button id=scrollBack value=->
@@ -60,17 +68,33 @@
 		</div>
 		<script src="lib.js"></script>
 		<script>
+			// TODO: save filter mode (adv, regex) (first byte?)
+
 			var maxtime = 1000 * 5; // 5 seconds
 			// Estimated rendering time per event is 89ns (someone should double-check
 			// this because I almost don't believe how fast this is).
 
 			var events = JSON.parse(GET('api.php?getEvents'));
+			var views = [];
+
 			var filteredEvents = [];
 			if (events.length == 0) {
 				alert("Error: no events found.");
 			}
+
 			$("from").value = unix2datestr(events[0].datetime - 1);
 			$("until").value = unix2datestr(events[events.length - 1].datetime + 1);
+
+			function updateViewDropdown() {
+				views = JSON.parse(GET('api.php?getViews'));
+				var sv = $("selectView");
+				sv.options.length = 0;
+				for (var viewi in views) {
+					var view = views[viewi];
+					sv.options[sv.options.length] = new Option(view.name + " (" + view.filter + ")"
+						, view.rowid);
+				}
+			}
 
 			function filterEvents() {
 				var starttime = new Date().getTime();
@@ -236,9 +260,25 @@
 			};
 
 			$("showalltime").onclick = function() {
-				$("from").value = unix2datestr(events[0].datetime - 1);
-				$("until").value = unix2datestr(events[events.length - 1].datetime + 1);
+				$("from").value = unix2datestr(filteredEvents[0].datetime - 1);
+				$("until").value = unix2datestr(filteredEvents[filteredEvents.length - 1].datetime + 1);
 				updateEvents();
+			};
+
+			$("saveView").onclick = function() {
+				var name = escape(prompt("Name?", ""));
+				if (name == null) {
+					return;
+				}
+				var filter = escape($("filter").value);
+				var from = datestr2unix($("from").value);
+				var until = datestr2unix($("until").value);
+				GET("api.php?saveView=" + name
+					+ "&datefrom=" + from
+					+ "&dateuntil=" + until
+					+ "&filter=" + filter
+				);
+				updateViewDropdown();
 			};
 
 			var elem = "until";
@@ -253,6 +293,16 @@
 
 			var elem = "filter";
 			$(elem).onkeyup = $(elem).onchange = $(elem).onmouseup = function() {
+				filterEvents();
+				updateEvents();
+			};
+
+			var elem = "selectView";
+			$(elem).onkeyup = $(elem).onchange = $(elem).onmouseup = function() {
+				var view = views[$("selectView").selectedIndex];
+				$("from").value = unix2datestr(view.datefrom);
+				$("until").value = unix2datestr(view.dateuntil);
+				$("filter").value = view.filter;
 				filterEvents();
 				updateEvents();
 			};
@@ -275,6 +325,7 @@
 
 			filterEvents();
 			updateEvents();
+			updateViewDropdown();
 		</script>
 	</body>
 </html>

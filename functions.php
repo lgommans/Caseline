@@ -6,6 +6,8 @@ function dbsetup() {
 	global $db;
 	$db->exec("CREATE TABLE events "
 		. "(datetime INTEGER, device TEXT, source TEXT, content TEXT, annotation TEXT)");
+	$db->exec("CREATE TABLE views "
+		. "(name TEXT, datefrom INTEGER, dateuntil DATETIME, filter TEXT)");
 }
 
 function getEvents() {
@@ -15,6 +17,16 @@ function getEvents() {
 	$results = [];
 	while ($row = $result->fetchArray()) {
 		$row["printableDatetime"] = date('j M H:i', $row['datetime']);
+		$results[] = $row;
+	}
+	return json_encode($results);
+}
+
+function getViews() {
+	global $db;
+	$result = $db->query('SELECT name, datefrom, dateuntil, filter FROM views');
+	$results = [];
+	while ($row = $result->fetchArray()) {
 		$results[] = $row;
 	}
 	return json_encode($results);
@@ -40,6 +52,20 @@ function insertEvent($unixtime, $device, $source, $content) {
 	$ok = $db->exec("INSERT INTO events VALUES($unixtime, '$device', '$source', '$content')");
 	if (!$ok) {
 		die("Error on $unixtime,$device,$source,$content");
+	}
+	return $ok;
+}
+
+function insertView($name, $datefrom, $dateuntil, $filter) {
+	global $db;
+	$name = SQLite3::escapeString($name);
+	$datefrom = intval($datefrom);
+	$dateuntil = intval($dateuntil);
+	$filter = SQLite3::escapeString($filter);
+
+	$ok = $db->exec("INSERT INTO views VALUES('$name', $datefrom, $dateuntil, '$filter')");
+	if (!$ok) {
+		die("Error on $name");
 	}
 	return $ok;
 }

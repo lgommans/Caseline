@@ -9,7 +9,7 @@ require('functions.php');
 
 if ($argv[1] == "create") {
 	dbsetup();
-	die("Done.");
+	die("Done.\n");
 }
 
 if ($argv[1] == "truncate") {
@@ -17,7 +17,7 @@ if ($argv[1] == "truncate") {
 	if ($ok === false) {
 		die("Error truncating.");
 	}
-	die("Done.");
+	die("Done.\n");
 }
 
 die("Invalid option.");
