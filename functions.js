@@ -3,6 +3,14 @@ function scrollBack(timechangeratio) {
 	var until = datestr2unix($("until").value);
 	var timespan = until - from;
 	var timechange = timespan * timechangeratio;
+	if (timechange < 60) {
+		if (parseInt(new Date().getTime().toString().substr(-3)) % 75 < 17) {
+			timechange = 60;
+		}
+		else {
+			timechange = 0;
+		}
+	}
 	var newfrom = from - timechange;
 	var newuntil = until - timechange;
 	if (newfrom < new Date(2015, 4, 1).getTime() / 1000) {
@@ -22,7 +30,15 @@ function scrollForward(timechangeratio) {
 	var from = datestr2unix($("from").value);
 	var until = datestr2unix($("until").value);
 	var timespan = (until - from);
-	var timechange = timespan * timechangeratio;
+	var timechange = Math.round(timespan * timechangeratio);
+	if (timechange < 60) {
+		if (parseInt(new Date().getTime().toString().substr(-3)) % 75 < 17) {
+			timechange = 60;
+		}
+		else {
+			timechange = 0;
+		}
+	}
 	var newfrom = from + timechange;
 	var newuntil = until + timechange;
 	if (newfrom < new Date(2015, 4, 1).getTime() / 1000) {

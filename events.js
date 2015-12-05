@@ -102,6 +102,12 @@ $(elem).onkeyup = $(elem).onchange = $(elem).onmouseup = function() {
 	updateEvents();
 };
 
+$("deleteView").onclick = function() {
+	if (confirm("Are you sure?")) {
+		alert("Then please ask Luc to implement this now. Tell him the time has come.");
+	}
+};
+
 document.addEventListener('wheel', function(ev) {
 	var ratio = ev.clientX / window.innerWidth;
 	var from = datestr2unix($("from").value);
@@ -117,6 +123,11 @@ document.addEventListener('wheel', function(ev) {
 		fromdiff = -fromdiff;
 		untildiff = -untildiff;
 	}
+	else {
+		if (timespan < 90) {
+			return;
+		}
+	}
 	var newfrom = from + fromdiff;
 	var newuntil = until - untildiff;
 	if (newfrom < new Date(2015, 4, 1).getTime() / 1000) {
@@ -131,10 +142,4 @@ document.addEventListener('wheel', function(ev) {
 	$("until").value = unix2datestr(newuntil);
 	updateEvents();
 });
-
-$("deleteView").onclick = function() {
-	if (confirm("Are you sure?")) {
-		alert("Then please ask Luc to implement this now. Tell him the time has come.");
-	}
-};
 
