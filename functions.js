@@ -177,7 +177,7 @@ function updateEvents() {
 
 		var col = (eventi % 2) * 8 + 247;
 		var evtDiv = newDiv($("timeline"));
-		var cur = (event.details.length > 0 ? "pointer" : "auto");
+		var cur = (event.details.length > 0 && event.details != "\n" ? "pointer" : "auto");
 		evtDiv.style = obj2style(
 			{ width: "150px"
 			, position: "absolute"
