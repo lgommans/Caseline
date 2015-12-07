@@ -17,7 +17,7 @@ function getEvents() {
 		. ' ORDER BY datetime');
 	$results = [];
 	while ($row = $result->fetchArray()) {
-		$row["printableDatetime"] = date('j M H:i', $row['datetime']);
+		$row["printableDatetime"] = date('j M H:i:s', $row['datetime']);
 		$results[] = $row;
 	}
 	return json_encode($results);
