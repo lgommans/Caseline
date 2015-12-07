@@ -11,7 +11,7 @@ if (!isset($_POST['sum'])) {
 			Source: <input name=src> (e.g. "logins" or "whatsapp log" or "whatsapp db")<br>
 			Summary column: <input type=numeric name=sum value=2 size=2> (0=not applicable)<br>
 			Details column: <input type=numeric name=dtls value=0 size=2> (0=not applicable)<br>
-			<input type=submit value=Parse>
+			<input type=submit value="Download parsed.csv">
 		</form>
 	<?php 
 	exit;
@@ -67,6 +67,6 @@ foreach ($lines as $line) {
 
 header("Content-Type: text/csv");
 header("Content-Length: " . strlen($out));
-header("Content-Disposition: attachment; filename=\"out.csv\"");
+header("Content-Disposition: attachment; filename=\"parsed.csv\"");
 die($out);
 
