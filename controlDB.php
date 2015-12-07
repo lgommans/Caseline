@@ -1,6 +1,24 @@
 #!/usr/bin/env php
 <?php 
 
+if (isset($_SERVER['REMOTE_ADDR'])) {
+	$argc = 1;
+	if (isset($_GET['load'])) {
+		$argv[] = '';
+		$argv[] = 'load';
+		$argv[] = $_GET['load'];
+		$argc = 3;
+	}
+	else {
+		$argv[] = '';
+		foreach ($_GET as $key=>$val) {
+			$argv[] = $key;
+		}
+	}
+}
+
+header("Content-Type: text/plain");
+
 if ($argc < 2) {
 	die("Usage: ./controlDB.php command [arguments]\n"
 		. "Commands: create | truncate | load\n"
@@ -16,6 +34,7 @@ if ($argv[1] == "create") {
 }
 
 if ($argv[1] == "truncate") {
+	copy('db.sqlite', 'db.sqlite.backup');
 	$ok = $db->exec("DELETE FROM events");
 	if ($ok === false) {
 		die("Error truncating.");
@@ -24,13 +43,16 @@ if ($argv[1] == "truncate") {
 }
 
 if ($argv[1] == "load") {
+	copy('db.sqlite', 'db.sqlite.backup');
 	$f = fopen($argv[2], 'r');
+	if ($f === false) {
+		die("Exiting because of file opening error.");
+	}
 	$rows = 0;
 	while ($row = fgets($f)) {
 		if (strlen($row) == 0) {
 			continue;
 		}
-		$rows += 1;
 		$inString = false;
 		$cols = [];
 		$currentCol = '';
@@ -62,8 +84,8 @@ if ($argv[1] == "load") {
 			}
 		}
 		$cols[] = $currentCol;
-		if (count($cols) != 5) {
-			echo "Warning: ".count($cols)."error on line $row\n";
+		if (count($cols) < 3 || count($cols) > 5) {
+			echo "Warning: error on line $row\n";
 			print_r($cols);
 			continue;
 		}
@@ -80,9 +102,17 @@ if ($argv[1] == "load") {
 			print_r($cols);
 			die("Error inserting");
 		}
+		else {
+			$rows += 1;
+		}
 	}
 
 	die("Done. Inserted $rows rows.\n");
+}
+
+if ($argv[1] == 'undo') {
+	rename('db.sqlite.backup', 'db.sqlite');
+	die("Done.\n");
 }
 
 die("Invalid option.\n");

@@ -1,18 +1,54 @@
 <?php 
+if (isset($_GET['undo'])) {
+	$_GET = ['undo' => ''];
+	require('controlDB.php');
+	exit;
+}
+
+if (isset($_GET['dbBackup'])) {
+	header("Content-Type: application/x-sqlite3");
+	header("Content-Length: " . filesize('db.sqlite'));
+	header("Content-Disposition: attachment; filename=\"db.sqlite\"");
+	readfile('db.sqlite');
+	exit;
+}
+
+if (isset($_GET['importParsedcsv'])) {
+	$_GET = ['load' => 'parsed.csv'];
+	require('controlDB.php');
+	exit;
+}
+
 if (!isset($_POST['sum'])) {
 	?>
+		Usage:<br>
+		1. Fill in the fields and hit "Save and download parsed.csv". This saves parsed.csv on the server <i>and</i> downloads it (the same file) so you can view it.<br>
+		2. Check/review your download. Is it how it should be? (Ask Luc the first few times!)<br>
+		3. Backup the database.<br>
+		4. Hit "Import parsed.csv into Caseline". Your events should now show up in Caseline.<br>
+		Did something go wrong? Give Luc your database backup. Forgot to make a backup? You can use the undo button, but you can use it only ONCE.<br>
+		<br>
 		<form method=POST action="?step=3" enctype="multipart/form-data">
+			<b>Step 1</b><br>
 			Select log: <input type=file name=log ><br>
-			Separator: <input name=sep value="<?php echo "\t";?>"> (default: tab)<br>
-			Max cols: <input type=numeric name=maxcols size=2 value=2><br>
-			Timestamp in column: <input type=numeric name=tscol size=2 value=1> (1=first)<br>
-			Timestamp is string: <input type=checkbox name=strTS><br>
-			Device: <input name=dev> (home|work|phone)<br>
-			Source: <input name=src> (e.g. "logins" or "whatsapp log" or "whatsapp db")<br>
-			Summary column: <input type=numeric name=sum value=2 size=2> (0=not applicable)<br>
-			Details column: <input type=numeric name=dtls value=0 size=2> (0=not applicable)<br>
-			<input type=submit value="Download parsed.csv">
+			<span id=a>
+				<input onclick="document.getElementById('a').style='display:none;'" type=checkbox name=isCSV> Use as CSV file, not as log. (Expert option. Reload page to undo.)<br>
+				Separator: <input name=sep value="<?php echo "\t";?>"> (default: tab)<br>
+				Max cols: <input type=numeric name=maxcols size=2 value=2><br>
+				Timestamp in column: <input type=numeric name=tscol size=2 value=1> (1=first)<br>
+				Timestamp is string: <input type=checkbox name=strTS><br>
+				Device: <input name=dev> (home|work|phone)<br>
+				Source: <input name=src> (e.g. "logins" or "whatsapp log" or "whatsapp db")<br>
+				Summary column: <input type=numeric name=sum value=2 size=2> (0=not applicable)<br>
+				Details column: <input type=numeric name=dtls value=0 size=2> (0=not applicable)<br>
+			</span>
+			<b>Step 2</b> <input type=submit value="Save and download parsed.csv">
 		</form>
+		<b>Step 3</b> <input type=button onclick='location="dbBackup";' value="Database backup"><br><br>
+
+		<b>Step 4</b> <input type=button onclick='location="?importParsedcsv";' value="Import parsed.csv into Caseline"> (This actually changes something. Steps above are harmless.)<br><br>
+
+		<b>Oops</b> <input type=button onclick='location="?undo";' value="undo"> (Only once!)
 	<?php 
 	exit;
 }
@@ -20,6 +56,10 @@ if (!isset($_POST['sum'])) {
 if (filesize($_FILES['log']['tmp_name']) > 1024 * 1024 * 64) {
 	unlink($_FILES['log']['tmp_name']);
 	die("File too large (>64MB).");
+}
+if (isset($_POST['isCSV'])) {
+	move_uploaded_file($_FILES['log']['tmp_name'], 'parsed.csv');
+	die("Done.");
 }
 $data = file_get_contents($_FILES['log']['tmp_name']);
 unlink($_FILES['log']['tmp_name']);
@@ -50,7 +90,7 @@ foreach ($lines as $line) {
 	else {
 		$sum = $line[intval($_POST['sum'])];
 	}
-	if (strpos('"', $sum) !== false) {
+	if (strpos($sum, '"') !== false) {
 		$sum = str_replace('"', '`', $sum); // oops.
 	}
 	if ($_POST['dtls'] == 0) {
@@ -69,4 +109,8 @@ header("Content-Type: text/csv");
 header("Content-Length: " . strlen($out));
 header("Content-Disposition: attachment; filename=\"parsed.csv\"");
 die($out);
+
+$fid = fopen('parsed.csv', 'w');
+fwrite($fid, $out);
+fclose($fid);
 
