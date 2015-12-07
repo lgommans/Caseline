@@ -44,7 +44,7 @@ if (!isset($_POST['sum'])) {
 			</span>
 			<b>Step 2</b> <input type=submit value="Save and download parsed.csv">
 		</form>
-		<b>Step 3</b> <input type=button onclick='location="dbBackup";' value="Database backup"><br><br>
+		<b>Step 3</b> <input type=button onclick='location="?dbBackup";' value="Database backup"><br><br>
 
 		<b>Step 4</b> <input type=button onclick='location="?importParsedcsv";' value="Import parsed.csv into Caseline"> (This actually changes something. Steps above are harmless.)<br><br>
 
@@ -105,12 +105,12 @@ foreach ($lines as $line) {
 	$out .= "$ts,\"$dev\",\"$src\",\"$sum\",\"$dtls\"\n";
 }
 
+$fid = fopen('parsed.csv', 'w');
+fwrite($fid, $out);
+fclose($fid);
+
 header("Content-Type: text/csv");
 header("Content-Length: " . strlen($out));
 header("Content-Disposition: attachment; filename=\"parsed.csv\"");
 die($out);
-
-$fid = fopen('parsed.csv', 'w');
-fwrite($fid, $out);
-fclose($fid);
 
