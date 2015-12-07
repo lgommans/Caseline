@@ -262,3 +262,37 @@ function updateEvents() {
 	}
 }
 
+function zoom(direction, ratio) {
+	var from = datestr2unix($("from").value);
+	var until = datestr2unix($("until").value);
+	var timespan = until - from;
+	var fromdiff = timespan * 0.3 * ratio;
+	var untildiff = timespan * 0.3 * (1 - ratio);
+	if (direction) {
+		if (timespan > 3600 * 24 * 200) {
+			timespan = 3600 * 24 * 200;
+			return;
+		}
+		fromdiff = -fromdiff;
+		untildiff = -untildiff;
+	}
+	else {
+		if (timespan < 90) {
+			return;
+		}
+	}
+	var newfrom = from + fromdiff;
+	var newuntil = until - untildiff;
+	if (newfrom < mindatetime) {
+		newfrom = mindatetime;
+		newuntil = newfrom + timespan;
+	}
+	if (newuntil > maxdatetime) {
+		newuntil = maxdatetime;
+		newfrom = newuntil - timespan;
+	}
+	$("from").value = unix2datestr(newfrom);
+	$("until").value = unix2datestr(newuntil);
+	updateEvents();
+}
+

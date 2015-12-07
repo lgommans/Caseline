@@ -136,38 +136,23 @@ $("parseLog").onclick = function() {
 	open("parseMyLog.php");
 };
 
+onkeydown = function(ev) {
+	if (ev.keyCode == 37) {
+		scrollBack(0.12);
+	}
+	if (ev.keyCode == 38) {
+		zoom(0, 0.5);
+	}
+	if (ev.keyCode == 39) {
+		scrollForward(0.12);
+	}
+	if (ev.keyCode == 39) {
+		zoom(0, 0.5);
+	}
+};
+
 document.addEventListener('wheel', function(ev) {
 	var ratio = ev.clientX / window.innerWidth;
-	var from = datestr2unix($("from").value);
-	var until = datestr2unix($("until").value);
-	var timespan = until - from;
-	var fromdiff = timespan * 0.3 * ratio;
-	var untildiff = timespan * 0.3 * (1 - ratio);
-	if (ev.deltaY > 0) {
-		if (timespan > 3600 * 24 * 200) {
-			timespan = 3600 * 24 * 200;
-			return;
-		}
-		fromdiff = -fromdiff;
-		untildiff = -untildiff;
-	}
-	else {
-		if (timespan < 90) {
-			return;
-		}
-	}
-	var newfrom = from + fromdiff;
-	var newuntil = until - untildiff;
-	if (newfrom < mindatetime) {
-		newfrom = mindatetime;
-		newuntil = newfrom + timespan;
-	}
-	if (newuntil > maxdatetime) {
-		newuntil = maxdatetime;
-		newfrom = newuntil - timespan;
-	}
-	$("from").value = unix2datestr(newfrom);
-	$("until").value = unix2datestr(newuntil);
-	updateEvents();
+	zoom(ev.deltaY > 0, ratio);
 });
 
