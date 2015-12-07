@@ -56,22 +56,6 @@ $("showalltime").onclick = function() {
 	updateEvents();
 };
 
-$("saveView").onclick = function() {
-	var name = escape(prompt("Name?", ""));
-	if (name == null) {
-		return;
-	}
-	var filter = escape($("filter").value);
-	var from = datestr2unix($("from").value);
-	var until = datestr2unix($("until").value);
-	GET("api.php?saveView=" + name
-		+ "&datefrom=" + from
-		+ "&dateuntil=" + until
-		+ "&filter=" + filter
-	);
-	updateViewDropdown();
-};
-
 var elem = "until";
 $(elem).onkeyup = $(elem).onchange = $(elem).onmouseup = function() {
 	updateEvents();
@@ -88,6 +72,31 @@ $(elem).onkeyup = $(elem).onchange = $(elem).onmouseup = function() {
 	updateEvents();
 };
 
+$("saveView").onclick = function() {
+	var name = escape(prompt("Name?", ""));
+	if (name == null) {
+		return;
+	}
+	var advfilter = 0;
+	if ($("advfilter").checked) {
+		advfilter = 1;
+	}
+	var regexfilter = 0;
+	if ($("regexfilter").checked) {
+		regexfilter = 1;
+	}
+	var mode = advfilter.toString() + regexfilter.toString();
+	var filter = escape($("filter").value);
+	var from = datestr2unix($("from").value);
+	var until = datestr2unix($("until").value);
+	GET("api.php?saveView=" + name
+		+ "&datefrom=" + from
+		+ "&dateuntil=" + until
+		+ "&filter=" + mode + filter
+	);
+	updateViewDropdown();
+};
+
 var elem = "selectView";
 $(elem).onkeyup = $(elem).onchange = $(elem).onmouseup = function() {
 	var v = $("selectView").selectedIndex;
@@ -95,6 +104,21 @@ $(elem).onkeyup = $(elem).onchange = $(elem).onmouseup = function() {
 		return;
 	}
 	var view = views[v - 1];
+	var advfilter = view.filter[0];
+	var regexfilter = view.filter[1];
+	view.filter = view.filter.substr(2);
+	if (advfilter) {
+		$("advfilter").checked = true;
+	}
+	else {
+		$("advfilter").checked = false;
+	}
+	if (regexfilter) {
+		$("regexfilter").checked = true;
+	}
+	else {
+		$("regexfilter").checked = false;
+	}
 	$("from").value = unix2datestr(view.datefrom);
 	$("until").value = unix2datestr(view.dateuntil);
 	$("filter").value = view.filter;
@@ -130,12 +154,12 @@ document.addEventListener('wheel', function(ev) {
 	}
 	var newfrom = from + fromdiff;
 	var newuntil = until - untildiff;
-	if (newfrom < new Date(2015, 4, 1).getTime() / 1000) {
-		newfrom = new Date(2015, 4, 1).getTime() / 1000;
+	if (newfrom < mindatetime) {
+		newfrom = mindatetime;
 		newuntil = newfrom + timespan;
 	}
-	if (newuntil > new Date(2015, 11, 1).getTime() / 1000) {
-		newuntil = new Date(2015, 11, 1).getTime() / 1000;
+	if (newuntil > maxdatetime) {
+		newuntil = maxdatetime;
 		newfrom = newuntil - timespan;
 	}
 	$("from").value = unix2datestr(newfrom);

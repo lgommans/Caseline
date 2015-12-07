@@ -27,14 +27,15 @@ function obj2style(obj) {
 
 function datestr2unix(datestr) {
 	datestr = datestr.split(' ');
-	if (datestr.length != 3 || datestr[2].split(":").length != 2) {
+	if (datestr.length != 3 || datestr[2].split(":").length != 3) {
 		return false;
 	}
 	var date = parseInt(datestr[0]);
 	var month = monthNames.indexOf(datestr[1]);
 	var hour = datestr[2].split(":")[0];
 	var minute = datestr[2].split(":")[1];
-	return (+new Date(2015, month, date, hour, minute)) / 1000;
+	var second = datestr[2].split(":")[2];
+	return (+new Date(2015, month, date, hour, minute, second)) / 1000;
 }
 
 function unix2datestr(unix) {
@@ -42,7 +43,8 @@ function unix2datestr(unix) {
 	return d.getDate() + " "
 		+ monthNames[d.getMonth()] + " "
 		+ leadingZero(d.getHours()) + ":"
-		+ leadingZero(d.getMinutes());
+		+ leadingZero(d.getMinutes()) + ":"
+		+ leadingZero(d.getSeconds());
 }
 
 function leadingZero(n) {

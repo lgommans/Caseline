@@ -4,6 +4,7 @@
 if ($argc < 2) {
 	die("Usage: ./controlDB.php command [arguments]\n"
 		. "Commands: create | truncate | load\n"
+		. "The 'truncate' command only truncates events. To remove everything, just\ndelete the database file.\n"
 		. "The 'load' command needs a csv file as argument.");
 }
 
@@ -23,9 +24,12 @@ if ($argv[1] == "truncate") {
 }
 
 if ($argv[1] == "load") {
-	$f = fopen($argv[1], 'r');
+	$f = fopen($argv[2], 'r');
 	$rows = 0;
 	while ($row = fgets($f)) {
+		if (strlen($row) == 0) {
+			continue;
+		}
 		$rows += 1;
 		$inString = false;
 		$cols = [];
@@ -37,6 +41,7 @@ if ($argv[1] == "load") {
 					$inString = false;
 				}
 				else {
+					if ($row[$i]==',')echo "Ignored comma!";
 					$currentCol .= $row[$i];
 				}
 			}
@@ -56,6 +61,11 @@ if ($argv[1] == "load") {
 			$firstByteOfCol = false;
 		}
 		$cols[] = $currentCol;
+		if (count($cols) != 5) {
+			echo "Warning: ".count($cols)."error on line $row\n";
+			print_r($cols);
+			continue;
+		}
 		if (!is_numeric($cols[0])) {
 			$cols[0] = strtotime($cols[0]);
 		}
@@ -63,8 +73,8 @@ if ($argv[1] == "load") {
 		for ($i = 1; $i < count($cols); $i++) {
 			$cols[$i] = SQLite3::escapeString($cols[$i]);
 		}
-		$ok = $db->exec("INSERT INTO events (datetime, device, source, content) "
-			. "VALUES($cols[0], '$cols[1]', '$cols[2]', '$cols[3]')");
+		$ok = $db->exec("INSERT INTO events (datetime, device, source, summary, details) "
+			. "VALUES($cols[0], '$cols[1]', '$cols[2]', '$cols[3]', '$cols[4]')");
 		if ($ok === false) {
 			print_r($cols);
 			die("Error inserting");

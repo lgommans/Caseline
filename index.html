@@ -61,7 +61,7 @@
 			<div id=controls>
 				<div id="fromDiv">
 					<input type=button id=scrollBack value=->
-					From: <input id=from value="25 Jun 00:00">
+					From: <input id=from value="25 Jun 00:00:00">
 				</div>
 				<div id="timeControlsDiv">
 					<input type=button id=showalltime value="Show all time">
@@ -71,7 +71,7 @@
 					<input type=checkbox id=regexfilter checked=checked>regex
 				</div>
 				<div id="untilDiv">
-					Until: <input id=until value="30 Aug 00:00">
+					Until: <input id=until value="30 Aug 00:00:00">
 					<input type=button id=scrollForward value=+>
 				</div>
 			</div>
@@ -82,11 +82,12 @@
 		<script src="functions.js"></script>
 		<script src="events.js"></script>
 		<script>
-			// TODO: save filter mode (adv, regex) (first byte?)
-
 			var maxtime = 1000 * 5; // 5 seconds
 			// Estimated rendering time per event is 89ns (someone should double-check
 			// this because I almost don't believe how fast this is).
+
+			var mindatetime = new Date(2015, 4, 1).getTime() / 1000; // Ignore events before...
+			var maxdatetime = new Date(2015, 11, 1).getTime() / 1000; // Ignore events after...
 
 			var events = JSON.parse(GET('api.php?getEvents'));
 			var views = [];

@@ -13,12 +13,12 @@ function scrollBack(timechangeratio) {
 	}
 	var newfrom = from - timechange;
 	var newuntil = until - timechange;
-	if (newfrom < new Date(2015, 4, 1).getTime() / 1000) {
-		newfrom = new Date(2015, 4, 1).getTime() / 1000;
+	if (newfrom < mindatetime) {
+		newfrom = mindatetime;
 		newuntil = newfrom + timespan;
 	}
-	if (newuntil > new Date(2015, 11, 1).getTime() / 1000) {
-		newuntil = new Date(2015, 11, 1).getTime() / 1000;
+	if (newuntil > maxdatetime) {
+		newuntil = maxdatetime;
 		newfrom = newuntil - timespan;
 	}
 	$("from").value = unix2datestr(newfrom);
@@ -41,12 +41,12 @@ function scrollForward(timechangeratio) {
 	}
 	var newfrom = from + timechange;
 	var newuntil = until + timechange;
-	if (newfrom < new Date(2015, 4, 1).getTime() / 1000) {
-		newfrom = new Date(2015, 4, 1).getTime() / 1000;
+	if (newfrom < mindatetime) {
+		newfrom = mindatetime;
 		newuntil = newfrom + timespan;
 	}
-	if (newuntil > new Date(2015, 11, 1).getTime() / 1000) {
-		newuntil = new Date(2015, 11, 1).getTime() / 1000;
+	if (newuntil > maxdatetime) {
+		newuntil = maxdatetime;
 		newfrom = newuntil - timespan;
 	}
 	$("from").value = unix2datestr(newfrom);
@@ -86,8 +86,11 @@ function filterEvents() {
 					var field = filters4[0];
 					var filter = filters4[1];
 					switch (field) {
-						case 'msg':
-							field = event.content;
+						case 'dtls':
+							field = event.details;
+							break;
+						case 'sum':
+							field = event.summary;
 							break;
 						case 'dev':
 							field = event.device;
@@ -117,14 +120,16 @@ function filterEvents() {
 			// No advanced filters
 			if ($("regexfilter").checked) {
 				re = new RegExp(filter);
-				if (re.test(event.content)
+				if (re.test(event.summary)
+						|| re.test(event.details)
 						|| re.test(event.source)
 						|| re.test(event.device)) {
 					filteredEvents.push(event);
 				}
 			}
 			else {
-				if (event.content.indexOf(filter) != -1
+				if (event.summary.indexOf(filter) != -1
+						|| event.details.indexOf(filter) != -1
 						|| event.source.indexOf(filter) != -1
 						|| event.device.indexOf(filter) != -1) {
 					filteredEvents.push(event);
@@ -162,10 +167,10 @@ function updateEvents() {
 		var left = Math.round(posPerc) + "%";
 		var top = 0;
 		if (previousEventPosPerc / posPerc > 0.9) {
-			if (previousEventTop > 800) {
-				previousEventTop = 800;
+			if (previousEventTop > 600) {
+				previousEventTop = 0;
 			}
-			top = previousEventTop + 95 - (previousEventTop * previousEventTop / 15000);
+			top = previousEventTop + 95;
 		}
 
 		var col = (eventi % 2) * 8 + 247;
@@ -189,8 +194,12 @@ function updateEvents() {
 		};
 		evtDiv.innerHTML = "<i>" + event.printableDatetime + "</i><br>"
 			+ "@" + event.device + ":<br>"
-			+ event.content + "<br>"
+			+ event.summary + "<br>"
 			+ "<i>Source: " + event.source + "</i>";
+		evtDiv.pleasedontkillme = {details: event.details};
+		evtDiv.onclick = function(ev) {
+			alert(ev.target.pleasedontkillme.details);
+		};
 
 		if (top == 0) {
 			previousEventPosPerc = posPerc;

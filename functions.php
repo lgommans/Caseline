@@ -5,15 +5,16 @@ $db = new SQLite3("db.sqlite");
 function dbsetup() {
 	global $db;
 	$db->exec("CREATE TABLE events "
-		. "(datetime INTEGER, device TEXT, source TEXT, content TEXT, annotation TEXT)");
+		. "(datetime INTEGER, device TEXT, source TEXT, summary TEXT, details TEXT)");
 	$db->exec("CREATE TABLE views "
 		. "(name TEXT, datefrom INTEGER, dateuntil DATETIME, filter TEXT)");
 }
 
 function getEvents() {
 	global $db;
-	$result = $db->query('SELECT rowid, datetime, device, source, content, annotation FROM events '
-		. 'ORDER BY datetime');
+	$result = $db->query('SELECT rowid, datetime, device, source, summary, details FROM events '
+		. 'WHERE datetime > ' . strtotime("June 2015") . ' AND datetime < ' . strtotime("December 2015")
+		. ' ORDER BY datetime');
 	$results = [];
 	while ($row = $result->fetchArray()) {
 		$row["printableDatetime"] = date('j M H:i', $row['datetime']);
@@ -36,22 +37,23 @@ function getDevices() {
 	return ['home', 'work', 'phone'];
 }
 
-function insertEvent($unixtime, $device, $source, $content) {
+function insertEvent($unixtime, $device, $source, $summary) {
 	global $db;
 	$unixtime = intval($unixtime);
 	if (in_array($device, getDevices(), true) !== true) {
 		die("Excuse me, what device is '$device'?");
 	}
-	if (empty($content)) {
-		die("Error: empty content.");
+	if (empty($summary)) {
+		die("Error: empty summary.");
 	}
 	$device = SQLite3::escapeString($device);
 	$source = SQLite3::escapeString($source);
-	$content = SQLite3::escapeString($content);
+	$summary = SQLite3::escapeString($summary);
+	$details = SQLite3::escapeString($details);
 
-	$ok = $db->exec("INSERT INTO events VALUES($unixtime, '$device', '$source', '$content')");
+	$ok = $db->exec("INSERT INTO events VALUES($unixtime, '$device', '$source', '$summary','$details')");
 	if (!$ok) {
-		die("Error on $unixtime,$device,$source,$content");
+		die("Error on $unixtime,$device,$source,$summary,$details");
 	}
 	return $ok;
 }
