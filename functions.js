@@ -141,7 +141,9 @@ function filterEvents() {
 			return;
 		}
 	}
-	//console.log("Filtering time: " + (new Date().getTime() - starttime) + "ms");
+	if (displayRenderingTime) {
+		console.log("Filtering time: " + (new Date().getTime() - starttime) + "ms");
+	}
 }
 
 function updateEvents() {
@@ -175,6 +177,7 @@ function updateEvents() {
 
 		var col = (eventi % 2) * 8 + 247;
 		var evtDiv = newDiv($("timeline"));
+		var cur = (event.details.length > 0 ? "pointer" : "auto");
 		evtDiv.style = obj2style(
 			{ width: "150px"
 			, position: "absolute"
@@ -185,6 +188,7 @@ function updateEvents() {
 			, "border-bottom": "2px solid black"
 			, "word-wrap": "break-word"
 			, top: top + "px"
+			, cursor: cur
 		});
 		evtDiv.onmouseover = function(ev) {
 			ev.target.style.zIndex = 9999;
@@ -192,9 +196,10 @@ function updateEvents() {
 		evtDiv.onmouseout  = function(ev) {
 			ev.target.style.zIndex = 0;
 		};
+		var summary = (event.summary.length > 0 ? event.summary + "<br>" : "");
 		evtDiv.innerHTML = "<i>" + event.printableDatetime + "</i><br>"
 			+ "@" + event.device + ":<br>"
-			+ event.summary + "<br>"
+			+ summary
 			+ "<i>Source: " + event.source + "</i>";
 		evtDiv.pleasedontkillme = {details: event.details};
 		evtDiv.onclick = function(ev) {
@@ -212,8 +217,10 @@ function updateEvents() {
 		}
 	}
 
-	//console.log("Rendering time: " + (new Date().getTime() - starttime) + "ms");
-	//starttime = new Date().getTime();
+	if (displayRenderingTime) {
+		console.log("Event render time: " + (new Date().getTime() - starttime) + "ms");
+	}
+	starttime = new Date().getTime();
 
 	if (window.lastTimespan != timespan) {
 		// Render timeline block background
@@ -250,6 +257,8 @@ function updateEvents() {
 
 	window.lastTimespan = timespan;
 
-	//console.log("Rendering time: " + (new Date().getTime() - starttime) + "ms");
+	if (displayRenderingTime) {
+		console.log("Block bg rendering: " + (new Date().getTime() - starttime) + "ms");
+	}
 }
 

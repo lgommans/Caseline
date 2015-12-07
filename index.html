@@ -87,6 +87,8 @@
 			// Estimated rendering time per event is 89ns (someone should double-check
 			// this because I almost don't believe how fast this is).
 
+			var displayRenderingTime = false;
+
 			var mindatetime = new Date(2015, 4, 1).getTime() / 1000; // Ignore events before...
 			var maxdatetime = new Date(2015, 11, 1).getTime() / 1000; // Ignore events after...
 

@@ -136,10 +136,6 @@ $("parseLog").onclick = function() {
 	open("parseMyLog.php");
 };
 
-$("controlDB").onclick = function() {
-	alert("Then please ask Luc to implement this now. Tell him the time has come.");
-};
-
 document.addEventListener('wheel', function(ev) {
 	var ratio = ev.clientX / window.innerWidth;
 	var from = datestr2unix($("from").value);
