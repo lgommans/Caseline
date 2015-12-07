@@ -37,16 +37,17 @@ if ($argv[1] == "load") {
 		$firstByteOfCol = true;
 		for ($i = 0; $i < strlen($row); $i++) {
 			if ($inString) {
+				$firstByteOfCol = false;
 				if ($inString == $row[$i]) {
 					$inString = false;
 				}
 				else {
-					if ($row[$i]==',')echo "Ignored comma!";
 					$currentCol .= $row[$i];
 				}
 			}
 			else if ($firstByteOfCol && ($row[$i] == '"' || $row[$i] == "'")) {
 				$inString = $row[$i];
+				$firstByteOfCol = false;
 			}
 			else {
 				if ($row[$i] == ',') {
@@ -56,9 +57,9 @@ if ($argv[1] == "load") {
 				}
 				else {
 					$currentCol .= $row[$i];
+					$firstByteOfCol = false;
 				}
 			}
-			$firstByteOfCol = false;
 		}
 		$cols[] = $currentCol;
 		if (count($cols) != 5) {
