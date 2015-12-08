@@ -133,7 +133,7 @@ $("deleteView").onclick = function() {
 };
 
 $("parseLog").onclick = function() {
-	open("parseMyLog.php");
+	open("webmanipulator.php");
 };
 
 onkeydown = function(ev) {

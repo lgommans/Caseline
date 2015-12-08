@@ -19,8 +19,9 @@ if (isset($_GET['importParsedcsv'])) {
 	exit;
 }
 
-if (!isset($_POST['sum'])) {
+if (!isset($_FILES['log'])) {
 	?>
+		<b><i>Import any log into Caseline</i></b>
 		Usage:<br>
 		1. Fill in the fields and hit "Save and download parsed.csv". This saves parsed.csv on the server <i>and</i> downloads it (the same file) so you can view it.<br>
 		2. Check/review your download. Is it how it should be? (Ask Luc the first few times!)<br>
@@ -28,7 +29,7 @@ if (!isset($_POST['sum'])) {
 		4. Hit "Import parsed.csv into Caseline". Your events should now show up in Caseline.<br>
 		Did something go wrong? Give Luc your database backup. Forgot to make a backup? You can use the undo button, but you can use it only ONCE.<br>
 		<br>
-		<form method=POST action="?step=3" enctype="multipart/form-data">
+		<form method=POST enctype="multipart/form-data">
 			<b>Step 1</b><br>
 			Select log: <input type=file name=log ><br>
 			<span id=a>
