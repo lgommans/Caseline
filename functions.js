@@ -160,6 +160,7 @@ function updateEvents() {
 
 	var previousEventPosPerc = 0;
 	var previousEventTop = 0;
+	var eventcount = 0;
 	for (var eventi in filteredEvents) {
 		var event = filteredEvents[eventi];
 		if (event.datetime < from || event.datetime > until) {
@@ -203,8 +204,12 @@ function updateEvents() {
 			+ "<i>Source: " + event.source + "</i>";
 		evtDiv.pleasedontkillme = {details: event.details};
 		evtDiv.onclick = function(ev) {
-			alert(ev.target.pleasedontkillme.details);
+			if (ev.target.pleasedontkillme && ev.target.pleasedontkillme.details && ev.target.pleasedontkillme.details.length > 1) {
+				alert(ev.target.pleasedontkillme.details);
+			}
 		};
+
+		eventcount += 1;
 
 		if (top == 0) {
 			previousEventPosPerc = posPerc;
@@ -216,6 +221,8 @@ function updateEvents() {
 			return;
 		}
 	}
+
+	$("eventcount").innerHTML = eventcount.toString() + "/" + events.length.toString();
 
 	if (displayRenderingTime) {
 		console.log("Event render time: " + (new Date().getTime() - starttime) + "ms");
