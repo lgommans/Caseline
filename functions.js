@@ -84,7 +84,7 @@ function filterEvents() {
 				for (var filters4 in filters3) {
 					filters4 = filters3[filters4].split(":");
 					var field = filters4[0];
-					var filter = filters4[1];
+					var filter5 = filters4[1];
 					switch (field) {
 						case 'dtls':
 							field = event.details;
@@ -101,8 +101,7 @@ function filterEvents() {
 						default:
 							return [];
 					}
-					if (!new RegExp(filter).test(field)) {
-						console.log(filter + " did not match " + field);
+					if (!new RegExp(filter5).test(field)) {
 						ok = false;
 						break;
 					}
@@ -222,7 +221,7 @@ function updateEvents() {
 		}
 	}
 
-	$("eventcount").innerHTML = eventcount.toString() + "/" + events.length.toString();
+	$("eventcount").innerHTML = eventcount.toString() + "/" + filteredEvents.length.toString() + "/" + events.length.toString();
 
 	if (displayRenderingTime) {
 		console.log("Event render time: " + (new Date().getTime() - starttime) + "ms");
