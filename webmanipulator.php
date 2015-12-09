@@ -14,8 +14,12 @@ if (isset($_GET['dbBackup'])) {
 }
 
 if (isset($_GET['importParsedcsv'])) {
+	if (!file_exists('parsed.csv')) {
+		die('No parsed.csv file on server.');
+	}
 	$_GET = ['load' => 'parsed.csv'];
 	require('controlDB.php');
+	unlink('parsed.csv');
 	exit;
 }
 
