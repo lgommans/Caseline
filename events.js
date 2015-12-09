@@ -137,6 +137,11 @@ $("parseLog").onclick = function() {
 };
 
 onkeydown = function(ev) {
+	var ae = document.activeElement;
+	if (ae == $("filter") || ae == $("from") || ae == $("until")) {
+		return;
+	}
+	console.log(ev.keyCode);
 	if (ev.keyCode == 37) {
 		scrollBack(0.12);
 	}
@@ -146,8 +151,8 @@ onkeydown = function(ev) {
 	if (ev.keyCode == 39) {
 		scrollForward(0.12);
 	}
-	if (ev.keyCode == 39) {
-		zoom(0, 0.5);
+	if (ev.keyCode == 40) {
+		zoom(-1, 0.5);
 	}
 };
 
