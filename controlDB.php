@@ -15,23 +15,18 @@ if (isset($_SERVER['REMOTE_ADDR'])) {
 			$argv[] = $key;
 		}
 	}
-}
 
-header("Content-Type: text/plain");
+	header("Content-Type: text/plain");
+}
 
 if ($argc < 2) {
 	die("Usage: ./controlDB.php command [arguments]\n"
-		. "Commands: create | truncate | load\n"
+		. "Commands: truncate | load\n"
 		. "The 'truncate' command only truncates events. To remove everything, just\ndelete the database file.\n"
 		. "The 'load' command needs a csv file as argument.");
 }
 
 require('functions.php');
-
-if ($argv[1] == "create") {
-	dbsetup();
-	die("Done.\n");
-}
 
 if ($argv[1] == "truncate") {
 	copy('db.sqlite', 'db.sqlite.backup');

@@ -1,6 +1,12 @@
 <?php 
 
-$db = new SQLite3("db.sqlite");
+if (!file_exists('db.sqlite')) {
+	$db = new SQLite3("db.sqlite");
+	dbsetup();
+}
+else {
+	$db = new SQLite3("db.sqlite");
+}
 
 function dbsetup() {
 	global $db;
