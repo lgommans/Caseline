@@ -160,9 +160,16 @@ function updateEvents() {
 	var previousEventPosPerc = 0;
 	var previousEventTop = 0;
 	var eventcount = 0;
+	$("scrollBack").style = "font-weight: normal; color: black;";
+	$("scrollForward").style = "font-weight: normal; color: black;";
 	for (var eventi in filteredEvents) {
 		var event = filteredEvents[eventi];
-		if (event.datetime < from || event.datetime > until) {
+		if (event.datetime < from) {
+			$("scrollBack").style = "font-weight: bold; color: red;";
+			continue;
+		}
+		if (event.datetime > until) {
+			$("scrollForward").style = "font-weight: bold; color: red;";
 			continue;
 		}
 		var posPerc = (event.datetime - from) / timespan * 100;
