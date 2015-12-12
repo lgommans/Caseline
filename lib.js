@@ -1,3 +1,4 @@
+// Dutch months. Sorry.
 monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"];
 
 function GET(uri) {
