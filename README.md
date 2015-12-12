@@ -20,10 +20,10 @@ using a regex) and save interesting views.
 
 ## Getting started
 
-You need a PHP server with php5-sqlite installed. That's all. Just dump the
-Caseline folder somewhere and go to it in Firefox (other browsers are not
-supported, though I think Chrome should come around with minimal
-modifications).
+You need a PHP server with php5-sqlite installed. Edit the case's start and
+ending time in index.html, dump the Caseline folder somewhere and browse to it
+in Firefox (other browsers are not supported, though I think Chrome should come
+around with minimal modifications).
 
 Importing events can be done either via the web interface (bit hacky) or via
 the command line: `./controlDB.php load my.csv`. Use `./controlDB.php` without
@@ -109,4 +109,46 @@ line would end in `...N%8\,,`
 The web interface also has a feature to turn normal log files into a Caseline
 csv file, and it has been tested... but people never used it (I ended up
 importing all events myself) so I don't know how practical it is to use that.
+
+## Known bugs / untested things
+
+- The views thing is used only sporadically
+- Importing logs or CSVs via the webinterface is a bit cumbersome
+- Multi-year or year-boundary-spanning cases are *completely* untested and has
+  not been kept in mind while writing the application.
+- Multi-line values, quoted or not, are not supported. A small modification in
+  controlDB.php should fix that.
+
+Ready for production? Meh, it worked for me. If you spend 1 hour getting into
+the code and 4 hours customizing your needs, it probably works for you in
+production as well. (Assuming you have mostly the same goals and only need to
+adjust/tweak some things.)
+
+## Code
+
+The code is structured as follows:
+
+The user loads index.html, which is just HTML (with all buttons and divs) and
+CSS. This loads:
+
+- lib.js which are some generic (and some not-so-generic) functions.
+- events.js which binds all buttons, the scroll wheel, arrow keys, etc.
+- functions.js which contains functions to go forward in time, refresh the
+  view, etc. These functions are absolutely application-specific whereas
+  lib.js' functions are not necessarily.
+
+After this it bootstraps the application which calls api.php to load all events
+and all views. The index.html file also contains a few settings that you will
+need to adjust (e.g. the case's from and until time which limits zooming and
+stuff).
+
+Api.php is a really dumb thing that actually just calls functions.php. This
+makes functions.php a bit specialized and little reusable, but that's the way
+it currently is. Functions.php also opens the database.
+
+ControlDB.php can be used from the command line and is also called by
+webmanipulator in some hacky way. It contains the csv parser.
+
+Finally webmanipulator.php is the web interface for database manipulation. It
+does some log parsing to create parsed.csv but otherwise contains little logic.
 
