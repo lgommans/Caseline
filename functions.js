@@ -61,7 +61,7 @@ function updateViewDropdown() {
 	sv.options.add(new Option("Select a view", -1));
 	for (var viewi in views) {
 		var view = views[viewi];
-		sv.options.add(new Option(view.name + " (" + view.filter + ")", view.rowid));
+		sv.options.add(new Option(view.name + " (" + view.filter.substr(2) + ")", view.rowid));
 	}
 }
 
@@ -197,21 +197,36 @@ function updateEvents() {
 			, top: top + "px"
 			, cursor: cur
 		});
+		var summary = (event.summary.length > 0 ? event.summary + "<br>" : "");
+		evtDiv.innerHTML = "<i>" + event.printableDatetime + "</i><br>"
+			+ "@" + event.device + ":<br>"
+			+ summary
+			+ "<i>Source: " + event.source + "</i>";
+		evtDiv.pleasedontkillme = {details: event.details, rowid: event.rowid};
 		evtDiv.onmouseover = function(ev) {
 			ev.target.style.zIndex = 9999;
 		};
 		evtDiv.onmouseout  = function(ev) {
 			ev.target.style.zIndex = 0;
 		};
-		var summary = (event.summary.length > 0 ? event.summary + "<br>" : "");
-		evtDiv.innerHTML = "<i>" + event.printableDatetime + "</i><br>"
-			+ "@" + event.device + ":<br>"
-			+ summary
-			+ "<i>Source: " + event.source + "</i>";
-		evtDiv.pleasedontkillme = {details: event.details};
 		evtDiv.onclick = function(ev) {
-			if (ev.target.pleasedontkillme && ev.target.pleasedontkillme.details && ev.target.pleasedontkillme.details.length > 1) {
-				alert(ev.target.pleasedontkillme.details);
+			if (ev.ctrlKey) {
+				if (confirm("Are you sure you want to delete this event?")) {
+					var result = GET("api.php?deleteEvent=" + ev.target.pleasedontkillme.rowid);
+					if (result != 'true') {
+						alert('Error deleting this event');
+					}
+					else {
+						events = JSON.parse(GET('api.php?getEvents'));
+						filterEvents();
+						updateEvents();
+					}
+				}
+			}
+			else {
+				if (ev.target.pleasedontkillme && ev.target.pleasedontkillme.details && ev.target.pleasedontkillme.details.length > 1) {
+					alert(ev.target.pleasedontkillme.details);
+				}
 			}
 		};
 

@@ -99,11 +99,11 @@ $("saveView").onclick = function() {
 
 var elem = "selectView";
 $(elem).onkeyup = $(elem).onchange = $(elem).onmouseup = function() {
-	var v = $("selectView").selectedIndex;
-	if (v == 0) {
+	var index = $("selectView").selectedIndex;
+	if (index == 0) {
 		return;
 	}
-	var view = views[v - 1];
+	var view = views[index - 1];
 	var advfilter = view.filter[0];
 	var regexfilter = view.filter[1];
 	view.filter = view.filter.substr(2);
@@ -128,7 +128,13 @@ $(elem).onkeyup = $(elem).onchange = $(elem).onmouseup = function() {
 
 $("deleteView").onclick = function() {
 	if (confirm("Are you sure?")) {
-		alert("Then please ask Luc to implement this now. Tell him the time has come.");
+		var result = GET("api.php?deleteView=" + evtDiv.target.pleasedontkillme.rowid);
+		if (result != 'true') {
+			alert('Error deleting this event');
+		}
+		else {
+			updateViewDropdown();
+		}
 	}
 };
 
