@@ -141,7 +141,6 @@ onkeydown = function(ev) {
 	if (ae == $("filter") || ae == $("from") || ae == $("until")) {
 		return;
 	}
-	console.log(ev.keyCode);
 	if (ev.keyCode == 37) {
 		scrollBack(0.12);
 	}
