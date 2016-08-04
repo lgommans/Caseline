@@ -2,31 +2,39 @@
 
 Make a timeline for your forensics case
 
+Interface overview with lots of events loaded:
+
+![Caseline interface, loaded with events](http://lgms.nl/files/caseline-overview.png)
+
+When zooming in on events, details quickly become clear:
+
+![Some events, without interface](http://lgms.nl/files/caseline-events.png)
+
 ## About
 
-The idea is that you import events and Caseline will display them for you in a
-browser, hopefully in a way that you can easily see what happened when.
+Caseline will display events on a timeline. Navigating and zooming into
+moments and events of interest is easy and quick.
 
 Events are read in CSV format with the following fields:
 
-- Datetime: December 12 2015 09:49:13
-- Device: work pc
-- Source: Firefox
-- Summary: Searched resignation letter template
-- Details: https://www.google.com/search?q=resignation+letter+template
+- Datetime, e.g. December 12 2015 09:49:13
+- Device, e.g. work pc
+- Source, e.g. Firefox
+- Summary, e.g. Searched resignation letter template
+- Details, e.g. https://www.google.com/search?q=resignation+letter+template
 
 You can choose which period of time to view, search/filter events (optionally
 using a regex) and save interesting views.
 
 ## Getting started
 
-You need a PHP server with php5-sqlite installed. Edit the case's start and
-ending time in index.html, dump the Caseline folder somewhere and browse to it
-in Firefox (other browsers are not supported, though I think Chrome should come
-around with minimal modifications).
+You need a PHP server with php5-sqlite installed. In index.html, edit the case's
+start and ending time, place the Caseline folder in the webserver and browse to
+it in Firefox (other browsers are untested, though Chrome is probably not much
+trouble).
 
-Importing events can be done either via the web interface (bit hacky) or via
-the command line: `./controlDB.php load my.csv`. Use `./controlDB.php` without
+Importing events can be done via the web interface (not recommended) or via the
+command line: `./controlDB.php load my.csv`. Use `./controlDB.php` without
 arguments for usage info.
 
 You can zoom in on periods of time by scrolling, or using the up and down arrow
@@ -131,7 +139,7 @@ The code is structured as follows:
 The user loads index.html, which is just HTML (with all buttons and divs) and
 CSS. This loads:
 
-- lib.js which are some generic (and some not-so-generic) functions.
+- lib.js which are some generic functions.
 - events.js which binds all buttons, the scroll wheel, arrow keys, etc.
 - functions.js which contains functions to go forward in time, refresh the
   view, etc. These functions are absolutely application-specific whereas
@@ -142,13 +150,11 @@ and all views. The index.html file also contains a few settings that you will
 need to adjust (e.g. the case's from and until time which limits zooming and
 stuff).
 
-Api.php is a really dumb thing that actually just calls functions.php. This
-makes functions.php a bit specialized and little reusable, but that's the way
-it currently is. Functions.php also opens the database.
+Api.php is a really dumb thing that actually just calls functions.php.
+Functions.php also opens the database.
 
 ControlDB.php can be used from the command line and is also called by
-webmanipulator in some hacky way. It contains the csv parser.
+webmanipulator. It contains the csv parser.
 
 Finally webmanipulator.php is the web interface for database manipulation. It
-does some log parsing to create parsed.csv but otherwise contains little logic.
-
+does some log parsing to create parsed.csv but contains little logic.
